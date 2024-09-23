@@ -7,9 +7,8 @@
 template <uint8_t ATTPIN, uint8_t CMDPIN, uint8_t DATPIN, uint8_t CLKPIN>
 class UsbPsxController
     : public PsxControllerBitBang<ATTPIN, CMDPIN, DATPIN, CLKPIN> {
-  Gamepad_ gamepad;
-
 public:
+  Gamepad_ gamepad;
   void reset();
   void loop();
   void send();

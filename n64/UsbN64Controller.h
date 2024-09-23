@@ -5,9 +5,8 @@
 #include "n64pad.h"
 
 template <uint8_t P, uint8_t B> class UsbN64Controller : public N64Pad<P, B> {
-  Gamepad_ gamepad;
-
 public:
+  Gamepad_ gamepad;
   void init();
   void loop();
   bool connected;

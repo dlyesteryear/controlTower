@@ -41,10 +41,11 @@ static const uint8_t hatMap[] PROGMEM = {
 
 template <uint8_t P, uint8_t B>
 UsbN64Controller<P, B>::UsbN64Controller()
-    : connected(false), hasRumble(false) {}
+    : connected(false), hasRumble(false) {
+  gamepad.reset();
+}
 
 template <uint8_t P, uint8_t B> void UsbN64Controller<P, B>::init() {
-  gamepad.reset();
   N64Pad<P, B>::init();
   // delay(100);
   if (Packet<B>::pack(indata, 3 * 8)) {

@@ -27,6 +27,12 @@ void setup() {
 }
 
 void loop() {
+  for (int i = 0; i < 10; ++i) {
+    pad1.gamepad.send();
+    delay(50);
+    pad2.gamepad.send();
+    delay(50);
+  };
   while (true) {
     if (!pad1.connected &&
         !pad2.connected) { // trying to init one slows for 1 timeout. If none is
