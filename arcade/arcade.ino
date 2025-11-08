@@ -54,24 +54,27 @@ static const int BUTTONS_NUM = 19;
 // PB
 // PF | PE>>1 | PC
 
+static const uint32_t SHIFT_D=0;
+static const uint32_t SHIFT_B=8;
+static const uint32_t SHIFT_F=16;
+static const uint32_t SHIFT_E=15; //1 bit shifted
+static const uint32_t SHIFT_C=16;
+
 static const uint32_t buttonsSrcBits[BUTTONS_NUM] = {
-    // conn 1
-    1L << 0, 1L << 1, 1L << 2, 1L << 3, 1L << 4, 1L << 6, // PD (6)
-    1L << (8 + 1), 1L << (8 + 7),                         // PB (2)
-    1L << (16 + 5),                                       // PE (1)
-    // conn 2
-    1L << (8 + 2), 1L << (8 + 3), 1L << (8 + 4), 1L << (8 + 5),
-    1L << (8 + 6),                  // PB (5)
-    1L << 7,                        // PD (1)
-    1L << (16 + 6), 1L << (16 + 7), // PC (2)
-    1L << (16 + 0), 1L << (16 + 1)  // PF (2)
-};
+    // conn 1 PD (6)  PB (2) PE (1)
+    bit(SHIFT_D + 0), bit(SHIFT_D + 1), bit(SHIFT_D + 2), bit(SHIFT_D + 3),
+    bit(SHIFT_B + 1), bit(SHIFT_D + 4), bit(SHIFT_E + 6), bit(SHIFT_B + 7),
+    bit(SHIFT_D + 6),
+
+    // conn 2  PB (5) PD (1) PC (2) PF (2)
+    bit(SHIFT_B + 2), bit(SHIFT_B + 3), bit(SHIFT_B + 4), bit(SHIFT_B + 5),
+    bit(SHIFT_B + 6), bit(SHIFT_D + 7), bit(SHIFT_F + 0), bit(SHIFT_F + 1),
+    bit(SHIFT_C + 6), bit(SHIFT_C + 7)};
 
 static const uint32_t buttonsDstBits[BUTTONS_NUM] = {
-    1L << 0x00, 1L << 0x01, 1L << 0x02, 1L << 0x03, 1L << 0x04,
-    1L << 0x05, 1L << 0x06, 1L << 0x07, 1L << 0x08, 1L << 0x09,
-    1L << 0x0A, 1L << 0x0B, 1L << 0x0C, 1L << 0x0D, 1L << 0x0E,
-    1L << 0x0F, 1L << 0x10, 1L << 0x11, 1L << 0x12};
+    bit(0x00), bit(0x01), bit(0x02), bit(0x03), bit(0x04), bit(0x05), bit(0x06),
+    bit(0x07), bit(0x08), bit(0x09), bit(0x0A), bit(0x0B), bit(0x0C), bit(0x0D),
+    bit(0x0E), bit(0x0F), bit(0x10), bit(0x11), bit(0x12)};
 
 uint32_t buttonsMillis[BUTTONS_NUM];
 
@@ -133,9 +136,9 @@ void loop() {
     // pressed)
     axesDirect = ~(PINF & B11110000);
     buttonsDirect =
-        ~((uint32_t)(PIND & MASKD) | (((uint32_t)(PINB & MASKB)) << 8) |
+        ~((uint32_t)(PIND & MASKD) | (((uint32_t)(PINB & MASKB)) << SHIFT_B) |
           (((uint32_t)((PINF & MASKF) | (PINC & MASKC) | ((PINE & MASKE) >> 1)))
-           << 16));
+           << SHIFT_F));
 
     if (debounce) {
       // Debounce axes
