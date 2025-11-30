@@ -23,16 +23,14 @@ void setup() {
   DDRD &= ~0x03;
   pad1.init();
   pad2.init();
-  delay(10);
 }
 
 void loop() {
-  for (int i = 0; i < 10; ++i) {
-    pad1.gamepad.send();
-    delay(50);
-    pad2.gamepad.send();
-    delay(50);
-  };
+  while (!USBDevice.configured()) {
+  }
+  pad1.gamepad.send();
+  pad2.gamepad.send();
+
   while (true) {
     if (!pad1.connected &&
         !pad2.connected) { // trying to init one slows for 1 timeout. If none is

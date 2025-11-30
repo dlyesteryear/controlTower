@@ -37,12 +37,11 @@ UsbPsxController<PIN_PS2_ATT_2, PIN_PS2_CMD_2, PIN_PS2_DAT_2, PIN_PS2_CLK_2>
 void setup() {}
 
 void loop() {
-  for (int i = 0; i < 10; ++i) {
-    psx1.gamepad.send();
-    delay(50);
-    psx2.gamepad.send();
-    delay(50);
-  };
+  while (!USBDevice.configured()) {
+  }
+  psx1.gamepad.send();
+  psx2.gamepad.send();
+
   while (true) {
     psx1.loop();
     psx2.loop();

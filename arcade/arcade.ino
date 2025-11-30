@@ -24,6 +24,9 @@
  */
 
 #include "Gamepad.h"
+#include "MMKeyboard.h"
+#include <USBAPI.h>
+
 // 1=Diddly-squat-Delay-Debouncing™ activated, 0=Debounce deactivated
 #define DEBOUNCE 1
 #define DEBOUNCE_TIME 10 // Debounce time in milliseconds
@@ -71,10 +74,14 @@ static const uint32_t buttonsSrcBits[BUTTONS_NUM] = {
     bit(SHIFT_B + 6), bit(SHIFT_D + 7), bit(SHIFT_F + 0), bit(SHIFT_F + 1),
     bit(SHIFT_C + 6), bit(SHIFT_C + 7)};
 
+static const uint32_t VOLUME_UP = bit(0x18);
+static const uint32_t VOLUME_DOWN = bit(0x19);
+
 static const uint32_t buttonsDstBits[BUTTONS_NUM] = {
-    bit(0x00), bit(0x01), bit(0x02), bit(0x03), bit(0x04), bit(0x05), bit(0x06),
-    bit(0x07), bit(0x08), bit(0x09), bit(0x0A), bit(0x0B), bit(0x0C), bit(0x0D),
-    bit(0x0E), bit(0x0F), bit(0x10), bit(0x11), bit(0x12)};
+    bit(0x00), bit(0x01), bit(0x02), bit(0x03),  bit(0x04),
+    bit(0x05), bit(0x06), bit(0x07), bit(0x08),  bit(0x09),
+    bit(0x0A), bit(0x0B), bit(0x0C), bit(0x0D),  bit(0x0E),
+    bit(0x0F), bit(0x10), VOLUME_UP, VOLUME_DOWN};
 
 uint32_t buttonsMillis[BUTTONS_NUM];
 
@@ -124,14 +131,21 @@ void setup() {
 }
 
 void loop() {
-  // Get current time, the millis() function should take about 2µs to complete
-  millisNow = millis();
+  while (!USBDevice.configured()) {
+  }
 
-  for (uint8_t i = 0; i < 10;
-       i++) // One iteration (when debounce is enabled) takes approximately 35µs
-            // to complete, so we don't need to check the time between every
-            // iteration
-  {
+  MMKeyboard.reset();
+  Gamepad.reset();
+
+  while (true) {
+
+    // Get current time, the millis() function should take about 2µs to complete
+    millisNow = millis();
+
+    /*for (uint8_t i = 0; i < 10; i++){ // One iteration (when debounce is
+       enabled) takes approximately 35µs
+              // to complete, so we don't need to check the time between every
+              // iteration*/
     // Read axis and button inputs (bitwise NOT results in a 1 when button/axis
     // pressed)
     axesDirect = ~(PINF & B11110000);
@@ -199,8 +213,9 @@ void loop() {
       usbUpdate = true;
     }
 
-    // Has button inputs changed?
-    if (buttons != buttonsPrev) {
+    uint32_t buttonChange = buttons ^ buttonsPrev;
+
+    if (buttonChange) {
       Gamepad._GamepadReport.buttonsL = buttons & 0xFFFF;
       Gamepad._GamepadReport.buttonsH = (buttons >> 16) & 0xFF;
       buttonsPrev = buttons;
@@ -209,7 +224,13 @@ void loop() {
 
     // Should gamepad data be sent to USB?
     if (usbUpdate) {
-      Gamepad.send();
+
+      if (buttonChange & (VOLUME_UP | VOLUME_DOWN)) {
+        MMKeyboard._MMKeybReport.media = buttons >> 24;
+        MMKeyboard.send();
+      } else {
+        Gamepad.send();
+      }
       usbUpdate = false;
 
 #ifdef DEBUG
@@ -222,5 +243,6 @@ void loop() {
       millisSent = millisNow;
 #endif
     }
-  }
+
+  } // while true
 }

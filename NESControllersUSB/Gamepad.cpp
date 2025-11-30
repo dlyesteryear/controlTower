@@ -26,39 +26,38 @@
 #include "Gamepad.h"
 
 static const uint8_t _hidReportDescriptor[] PROGMEM = {
-    0x05, 0x01, // USAGE_PAGE (Generic Desktop)
-    0x09, 0x04, // USAGE (Joystick)
-    0xa1, 0x01, // COLLECTION (Application)
-    0xa1, 0x00, // COLLECTION (Physical)
+  0x05, 0x01,                       // USAGE_PAGE (Generic Desktop)
+  0x09, 0x04,                       // USAGE (Joystick) (Maybe change to gamepad? I don't think so but...)
+  0xa1, 0x01,                       // COLLECTION (Application)
+    0xa1, 0x00,                       // COLLECTION (Physical)
+    
+      0x05, 0x09,                       // USAGE_PAGE (Button)
+      0x19, 0x01,                       // USAGE_MINIMUM (Button 1)
+      0x29, 0x04,                       // USAGE_MAXIMUM (Button 4)
+      0x15, 0x00,                       // LOGICAL_MINIMUM (0)
+      0x25, 0x01,                       // LOGICAL_MAXIMUM (1)
+      0x95, 0x04,                       // REPORT_COUNT (4)
+      0x75, 0x01,                       // REPORT_SIZE (1)
+      0x81, 0x02,                       // INPUT (Data,Var,Abs)
 
-    0x05, 0x09,     // USAGE_PAGE (Button)
-    0x19, 0x01,     // USAGE_MINIMUM (Button 1)
-    0x29, 0x13 - 2, // USAGE_MAXIMUM (Button 19 -volume)
-    0x15, 0x00,     // LOGICAL_MINIMUM (0)
-    0x25, 0x01,     // LOGICAL_MAXIMUM (1)
-    0x95, 0x13 - 2, // REPORT_COUNT (19)
-    0x75, 0x01,     // REPORT_SIZE (1)
-    0x81, 0x02,     // INPUT (Data,Var,Abs)
+      0x95, 0x01,                       // REPORT_COUNT (1) ; pad out the bits into a number divisible by 8
+      0x75, 0x04,                       // REPORT_SIZE (4)
+      0x81, 0x03,                       // INPUT (Const,Var,Abs)
+    
+      0x05, 0x01,                       // USAGE_PAGE (Generic Desktop)
+      0x09, 0x01,                       // USAGE (pointer)
+      0xa1, 0x00,                       // COLLECTION (Physical) 
+        0x09, 0x30,                       // USAGE (X)
+        0x09, 0x31,                       // USAGE (Y)
+        0x15, 0xff,                       // LOGICAL_MINIMUM (-1)
+        0x25, 0x01,                       // LOGICAL_MAXIMUM (1)
+        0x95, 0x02,                       // REPORT_COUNT (2)
+        0x75, 0x08,                       // REPORT_SIZE (8)
+        0x81, 0x02,                       // INPUT (Data,Var,Abs)
+      0xc0,                             // END_COLLECTION
 
-    // --- Padding to align to next byte boundary (5 bits)
-    0x95, 0x01,     // REPORT_COUNT (1)
-    0x75, 0x05 + 2, // REPORT_SIZE (5)
-    0x81, 0x03,     // INPUT (Const,Var,Abs)  -- constant padding
-
-    0x05, 0x01, // USAGE_PAGE (Generic Desktop)
-    0x09, 0x01, // USAGE (pointer)
-    0xa1, 0x00, // COLLECTION (Physical)
-    0x09, 0x30, // USAGE (X)
-    0x09, 0x31, // USAGE (Y)
-    0x15, 0xff, // LOGICAL_MINIMUM (-1)
-    0x25, 0x01, // LOGICAL_MAXIMUM (1)
-    0x95, 0x02, // REPORT_COUNT (2)
-    0x75, 0x02, // REPORT_SIZE (2)
-    0x81, 0x02, // INPUT (Data,Var,Abs)
-    0xc0,       // END_COLLECTION
-
-    0xc0, // END_COLLECTION
-    0xc0, // END_COLLECTION
+    0xc0,                             // END_COLLECTION
+  0xc0,                             // END_COLLECTION 
 };
 
 Gamepad_::Gamepad_(void) : PluggableUSBModule(1, 1, epType), protocol(HID_REPORT_PROTOCOL), idle(1)
@@ -133,11 +132,11 @@ bool Gamepad_::setup(USBSetup& setup)
   return false;
 }
 
-void Gamepad_::reset() {
+void Gamepad_::reset()
+{
   _GamepadReport.X = 0;
   _GamepadReport.Y = 0;
-  _GamepadReport.buttonsL = 0;
-  _GamepadReport.buttonsH = 0;
+  _GamepadReport.buttons = 0;
   this->send();
 }
 
